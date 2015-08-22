@@ -1,0 +1,25 @@
+VAGRANTFILE_API_VERSION = "2"
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.define "db" do |db|
+    db.vm.box = "ubuntu/trusty64"
+    db.vm.network "forwarded_port", guest: 80, host: 8080
+    db.vm.network "forwarded_port", guest: 443, host: 8443
+    db.vm.network "forwarded_port", guest: 5432, host:5432
+    db.vm.network "forwarded_port", guest: 27017, host:27017
+    #db.vm.network "private_network", ip: "192.168.59.5"
+    db.vm.synced_folder "./data", "/vagrant_data"
+  end
+  config.vm.define "app" do |app|
+    app.vm.box = "ubuntu/trusty64"
+    app.vm.network "forwarded_port", guest: 80, host: 8081
+    app.vm.network "forwarded_port", guest: 443, host: 8444
+    app.vm.synced_folder "./data", "/vagrant_data"
+  end
+  config.vm.define "web" do |web|
+    web.vm.box = "ubuntu/trusty64"
+    web.vm.network "forwarded_port", guest: 80, host: 8082
+    web.vm.network "forwarded_port", guest: 443, host: 8445
+    web.vm.synced_folder "./data", "/vagrant_data"
+  end 
+end
+
