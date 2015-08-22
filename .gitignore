@@ -38,9 +38,6 @@
 ehthumbs.db
 Thumbs.db
 
-# db
-#####################
-db/
 
 # npm package
 #####################

@@ -1,0 +1,47 @@
+---
+- hosts: db
+  sudo: yes
+  gather_facts: no
+
+  tasks:
+  - name: ensure apt cache is up to date
+    apt: update_cache=yes
+  - name: ensure packages are installed
+    apt: name={{item}}
+    with_items:
+        - postgresql
+        - libpq-dev
+        - python-psycopg2
+
+- hosts: db
+  sudo: yes
+  sudo_user: postgres
+  gather_facts: no
+
+  vars:
+    dbname: poc
+    dbuser: poc_user
+    dbpassword: scope2009
+
+  tasks:
+  - name: ensure database is created
+    postgresql_db: name={{dbname}}
+
+  - name: ensure user has access to database
+    postgresql_user: db={{dbname}} name={{dbuser}} password={{dbpassword}} priv=ALL
+
+  - name: ensure user does not have unnecessary privilege
+    postgresql_user: name={{dbuser}} role_attr_flags=NOSUPERUSER,NOCREATEDB
+
+- hosts: db
+  sudo: yes
+  sudo_user: postgres
+  gather_facts: no
+
+  tasks:
+  - name: copy postgresql pg_hba file
+    copy: src=config/postgresql/pg_hba.conf dest=/etc/postgresql/9.3/main/pg_hba.conf
+  - name: copy postgresql configuration file
+    copy: src=config/postgresql/postgresql.conf dest=/etc/postgresql/9.3/main/postgresql.conf
+  - name: restarted postgresql
+    service: name=postgresql state=restarted

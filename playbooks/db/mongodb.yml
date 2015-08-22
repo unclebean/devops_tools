@@ -1,0 +1,23 @@
+---
+- hosts: db
+  sudo: yes
+  gather_facts: no
+
+  tasks:
+  - name: update from keyserver
+    apt_key: keyserver=keyserver.ubuntu.com id=7F0CEB10
+
+  - name: create a list file for MongoDB
+    shell: echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+
+  - name: ensure apt cache is up to date
+    apt: update_cache=yes
+
+  - name: install mongoDB
+    apt: name=mongodb-org
+
+  - name: copy mongod.conf
+    copy: src=config/mongodb/mongod.conf dest=/etc/mongod.conf
+
+  - name: start mongoDB service
+    service: name=mongod state=started
